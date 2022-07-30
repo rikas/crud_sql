@@ -4,8 +4,17 @@ class Task
 
   def initialize(attributes = {})
     # Converts the keys of the attributes hash, from strings to symbols, because we are reading the
-    # values using symbols.
+    # values using symbols. The method with exclamation mark is what's called a DESTRUCTIVE method -
+    # it will change the attributes variable.
     attributes.transform_keys! { |key| key.to_sym }
+
+    # If we don't use a destructive method then we need to reassign the variable. This is exactly
+    # the same as the above.
+    attributes = attributes.transform_keys { |key| key.to_sym }
+
+    # We can also do a short version of line 9. If all we do to the keys is call the method to_sym
+    # then we can write it in this weird syntax:
+    attributes.transform_keys!(&:to_sym)
 
     @id = attributes[:id]
     @title = attributes[:title]
@@ -50,6 +59,8 @@ class Task
     # {"id"=>1, "title"=>"Complete Livecode", "description"=>"Implement CRUD on Task", "done"=>0}
     details = result.first
 
+    # Initialize a new task with all the columns from the database. The information from the DB will
+    # now exist in memory.
     Task.new(details)
   end
 
@@ -60,6 +71,8 @@ class Task
 
     DB.execute(query, @title, @description, @done)
 
+    # The record was stored in the DB and now we need to fetch the ID of the record we just inserted
+    # to update the in memory data (the instance variable for the given instance).
     @id = DB.last_insert_row_id
   end
 
